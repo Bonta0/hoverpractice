@@ -87,12 +87,16 @@ private:
 
 std::unique_ptr<XInputLoader> xinput;
 
+class XInputController;
+std::list<std::unique_ptr<XInputController>> controllers;
+
 bool xinput_init() {
     xinput = std::make_unique<XInputLoader>();
     return xinput && xinput->Load();
 }
 
 void xinput_exit() {
+    controllers.clear();
     xinput.reset();
 }
 
@@ -198,8 +202,6 @@ private:
     std::map<Action, WORD> bindings;
     DWORD id;
 };
-
-std::list<std::unique_ptr<XInputController>> controllers;
 
 Controller* xinput_open(DWORD dwIndex) {
     if (dwIndex < 0 && dwIndex >= 4) return nullptr;

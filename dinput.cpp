@@ -45,18 +45,23 @@ void dinput_enum(const dinput_enum_cb& callback) {
         return;
     }
 
-    auto res = pDInput->EnumDevices(
-        DI8DEVCLASS_GAMECTRL,
-        [](LPCDIDEVICEINSTANCE instance, LPVOID reference) {
-            auto& callback = *reinterpret_cast<const dinput_enum_cb*>(reference);
-            std::wstring wname(instance->tszProductName);
-            std::string name(wname.begin(), wname.end());
-            callback(instance->guidInstance, name);
-            return DIENUM_CONTINUE;
-        },
-        reinterpret_cast<LPVOID>(const_cast<dinput_enum_cb*>(&callback)),
-        DIEDFL_ATTACHEDONLY
-    );
+    auto enum_devices = [&](DWORD type) {
+        return pDInput->EnumDevices(
+            type,
+            [](LPCDIDEVICEINSTANCE instance, LPVOID reference) {
+                auto& callback = *reinterpret_cast<const dinput_enum_cb*>(reference);
+                std::wstring wname(instance->tszProductName);
+                std::string name(wname.begin(), wname.end());
+                callback(instance->guidInstance, name);
+                return DIENUM_CONTINUE;
+            },
+            reinterpret_cast<LPVOID>(const_cast<dinput_enum_cb*>(&callback)),
+            DIEDFL_ATTACHEDONLY
+            );
+    };
+
+    enum_devices(DI8DEVCLASS_GAMECTRL);
+    enum_devices(DI8DEVCLASS_KEYBOARD);
 }
 
 class DInputController final : public Controller {

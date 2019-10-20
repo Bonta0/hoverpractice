@@ -105,7 +105,7 @@ private:
 std::unique_ptr<SDLLoader> sdl;
 
 class SDLController;
-std::list<std::unique_ptr<SDLController>> controllers;
+static std::list<std::unique_ptr<SDLController>> controllers;
 
 bool sdl_init() {
     sdl = std::make_unique<SDLLoader>();

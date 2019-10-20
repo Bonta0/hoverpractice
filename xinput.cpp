@@ -89,7 +89,7 @@ private:
 std::unique_ptr<XInputLoader> xinput;
 
 class XInputController;
-std::list<std::unique_ptr<XInputController>> controllers;
+static std::list<std::unique_ptr<XInputController>> controllers;
 
 bool xinput_init() {
     xinput = std::make_unique<XInputLoader>();

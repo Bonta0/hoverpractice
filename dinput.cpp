@@ -15,7 +15,7 @@
 LPDIRECTINPUT8 pDInput = nullptr;
 
 class DInputController;
-std::list<std::unique_ptr<DInputController>> controllers;
+static std::list<std::unique_ptr<DInputController>> controllers;
 
 bool dinput_init() {
     auto res = DirectInput8Create(

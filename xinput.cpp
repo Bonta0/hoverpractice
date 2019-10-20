@@ -92,7 +92,11 @@ std::list<std::unique_ptr<XInputController>> controllers;
 
 bool xinput_init() {
     xinput = std::make_unique<XInputLoader>();
-    return xinput && xinput->Load();
+    if (xinput != nullptr && xinput->Load()) {
+        return true;
+    }
+    xinput.reset();
+    return false;
 }
 
 void xinput_exit() {
@@ -185,7 +189,6 @@ public:
 
     Action GetState() override {
         Action res{};
-
         XINPUT_STATE state;
         if (xinput->GetState(id, &state) == ERROR_SUCCESS) {
             for (auto& pair : bindings) {
@@ -204,10 +207,11 @@ private:
 };
 
 Controller* xinput_open(DWORD dwIndex) {
-    if (dwIndex < 0 && dwIndex >= 4) return nullptr;
+    if (xinput == nullptr || (dwIndex < 0 && dwIndex >= 4)) {
+        return nullptr;
+    }
 
-    auto controller = std::make_unique<XInputController>(dwIndex);
-    return &*controllers.emplace_back(std::move(controller));
+    return &*controllers.emplace_back(std::make_unique<XInputController>(dwIndex));
 }
 
 void xinput_close(const Controller* controller) {

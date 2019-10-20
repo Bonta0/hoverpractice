@@ -4,6 +4,8 @@
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "dxguid.lib")
 
+#include <algorithm>
+#include <list>
 #include <map>
 #include <string>
 
@@ -51,7 +53,10 @@ void dinput_enum(const dinput_enum_cb& callback) {
             [](LPCDIDEVICEINSTANCE instance, LPVOID reference) {
                 auto& callback = *reinterpret_cast<const dinput_enum_cb*>(reference);
                 std::wstring wname(instance->tszProductName);
-                std::string name(wname.begin(), wname.end());
+                std::string name;
+                std::transform(wname.begin(), wname.end(), std::back_inserter(name), [](const auto& wc) {
+                    return static_cast<char>(wc);
+                });
                 callback(instance->guidInstance, name);
                 return DIENUM_CONTINUE;
             },
@@ -106,7 +111,6 @@ public:
         }
 
         Action res{};
-
         DIJOYSTATE2 state;
         if (device->GetDeviceState(sizeof(state), reinterpret_cast<LPVOID>(&state)) == DI_OK) {
             for (auto& pair : bindings) {
@@ -121,7 +125,6 @@ public:
 
 private:
     std::map<Action, size_t> bindings;
-
     LPDIRECTINPUTDEVICE8 device = nullptr;
 };
 
@@ -130,8 +133,7 @@ Controller* dinput_open(const GUID& guidInstance) {
         return nullptr;
     }
 
-    auto controller = std::make_unique<DInputController>(guidInstance);
-    return &*controllers.emplace_back(std::move(controller));
+    return &*controllers.emplace_back(std::make_unique<DInputController>(guidInstance));
 }
 
 void dinput_close(const Controller* controller) {

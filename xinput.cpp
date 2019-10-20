@@ -124,6 +124,7 @@ void xinput_enum(const xinput_enum_cb& callback) {
         case XINPUT_DEVSUBTYPE_ARCADE_STICK:
             name = "Arcade stick controller";
             break;
+#ifndef __WINE_XINPUT_H
         case XINPUT_DEVSUBTYPE_FLIGHT_STICK:
             name = "Flight stick controller";
             break;
@@ -142,6 +143,7 @@ void xinput_enum(const xinput_enum_cb& callback) {
             name = "Arcade pad controller";
             break;
         case XINPUT_DEVSUBTYPE_UNKNOWN:
+#endif
         default:
             name = "Unknown";
             break;

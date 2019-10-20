@@ -12,8 +12,10 @@
 
 #include "controller.h"
 
-#ifdef _WIN32
+#ifdef USE_DINPUT
 #include "dinput.h"
+#endif
+#ifdef USE_XINPUT
 #include "xinput.h"
 #endif
 #include "sdl.h"
@@ -82,8 +84,10 @@ bool use_xinput = false;
 bool use_sdl = false;
 
 void cleanup() {
-#ifdef _WIN32
+#ifdef USE_DINPUT
     dinput_exit();
+#endif
+#ifdef USE_XINPUT
     xinput_exit();
 #endif
     sdl_exit();
@@ -91,12 +95,14 @@ void cleanup() {
 
 int main()
 {
-#ifdef _WIN32
+#ifdef USE_DINPUT
     use_dinput = dinput_init();
     if (!use_dinput) {
         std::cout << "DirectInput initialization failed" << std::endl;
     }
+#endif
 
+#ifdef USE_XINPUT
     use_xinput = xinput_init();
     if (!use_xinput) {
         std::cout << "XInput initialization failed" << std::endl;
@@ -114,7 +120,7 @@ int main()
 
     std::vector<std::pair<std::variant<DWORD, GUID, int>, std::string>> devices;
 
-#ifdef _WIN32
+#ifdef USE_DINPUT
     if (use_dinput) {
         std::cout << "DirectInput devices:" << std::endl;
         dinput_enum([&](const auto& guidInstance, const auto& name) {
@@ -122,7 +128,9 @@ int main()
             std::cout << " [" << std::to_string(devices.size()) << "] " << name << std::endl;
         });
     }
+#endif
 
+#ifdef USE_XINPUT
     if (use_xinput) {
         std::cout << "XInput devices:" << std::endl;
         xinput_enum([&](const auto& dwIndex, const auto& name) {
@@ -164,15 +172,19 @@ int main()
     Controller* controller = nullptr;
 
     std::cout << "Opening \"" << device_pair.second << "\" ";
+#ifdef USE_DINPUT
     if (std::holds_alternative<GUID>(device_pair.first)) {
         controller = dinput_open(std::get<GUID>(device_pair.first));
         std::cout << "(DirectInput)";
     }
-    else if (std::holds_alternative<DWORD>(device_pair.first)) {
+#endif
+#ifdef USE_XINPUT
+    if (std::holds_alternative<DWORD>(device_pair.first)) {
         controller = xinput_open(std::get<DWORD>(device_pair.first));
         std::cout << "(XInput)";
     }
-    else if (std::holds_alternative<int>(device_pair.first)) {
+#endif
+    if (std::holds_alternative<int>(device_pair.first)) {
         controller = sdl_open(std::get<int>(device_pair.first));
         std::cout << "(SDL)";
     }

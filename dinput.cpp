@@ -53,12 +53,16 @@ void dinput_enum(const dinput_enum_cb& callback) {
             type,
             [](LPCDIDEVICEINSTANCE instance, LPVOID reference) {
                 auto& callback = *reinterpret_cast<const dinput_enum_cb*>(reference);
+#ifdef _UNICODE
                 std::wstring wname(instance->tszProductName);
                 std::string name;
                 std::transform(wname.begin(), wname.end(), std::back_inserter(name), [](const auto& wc) {
                     return static_cast<char>(wc);
                 });
                 callback(instance->guidInstance, name);
+#else
+                callback(instance->guidInstance, instance->tszProductName);
+#endif
                 return DIENUM_CONTINUE;
             },
             reinterpret_cast<LPVOID>(const_cast<dinput_enum_cb*>(&callback)),

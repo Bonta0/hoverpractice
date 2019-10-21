@@ -14,9 +14,15 @@
 
 #ifdef USE_DINPUT
 #include "dinput.h"
+#define DINPUT_VARIANT_TYPE GUID,
+#else
+#define DINPUT_VARIANT_TYPE
 #endif
 #ifdef USE_XINPUT
 #include "xinput.h"
+#define XINPUT_VARIANT_TYPE DWORD,
+#else
+#define XINPUT_VARIANT_TYPE
 #endif
 #include "sdl.h"
 
@@ -118,7 +124,7 @@ int main()
 
     std::cout << "-------------------------------" << std::endl;
 
-    std::vector<std::pair<std::variant<DWORD, GUID, int>, std::string>> devices;
+    std::vector<std::pair<std::variant<DINPUT_VARIANT_TYPE XINPUT_VARIANT_TYPE int>, std::string>> devices;
 
 #ifdef USE_DINPUT
     if (use_dinput) {

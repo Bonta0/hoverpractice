@@ -27,3 +27,7 @@ if(WIN32)
 endif()
 
 add_executable(hoverpractice ${SRCS} ${HEADERS})
+
+if(NOT WIN32)
+    target_link_libraries(hoverpractice ${CMAKE_DL_LIBS})
+endif()
